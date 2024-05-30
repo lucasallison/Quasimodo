@@ -1,5 +1,6 @@
 #include "quantum_circuit.h"
 #include "cflobdd/CFLOBDD/matrix1234_complex_float_boost.h"
+#include "cflobdd/CFLOBDD/wmatrix1234_complex_fb_mul.h"
 #include "cflobdd/CFLOBDD/vector_complex_float_boost.h"
 #include <random>
 
@@ -1014,7 +1015,7 @@ void WeightedBDDQuantumCircuit::setNumQubits(unsigned int num)
     stateVector = WeightedVectorComplexFloatBoostMul::MkBasisVector(numQubits, 0, 0);
 }
 
-WEIGHTED_CFLOBDD_COMPLEX_FLOAT_BOOST_MUL ApplyGateF(unsigned int n, unsigned int i, WEIGHTED_CFLOBDD_COMPLEX_FLOAT_BOOST_MUL(*f)(unsigned int, int))
+WEIGHTED_CFLOBDD_COMPLEX_FLOAT_BOOST_MUL ApplyGateF2(unsigned int n, unsigned int i, WEIGHTED_CFLOBDD_COMPLEX_FLOAT_BOOST_MUL(*f)(unsigned int, int))
 {
     WEIGHTED_CFLOBDD_COMPLEX_FLOAT_BOOST_MUL H = f(2, 0);
     if (i == 0)
@@ -1035,7 +1036,7 @@ WEIGHTED_CFLOBDD_COMPLEX_FLOAT_BOOST_MUL ApplyGateF(unsigned int n, unsigned int
     }
 }
 
-WEIGHTED_CFLOBDD_COMPLEX_FLOAT_BOOST_MUL ApplyGateFWithParam(unsigned int n, unsigned int i, WEIGHTED_CFLOBDD_COMPLEX_FLOAT_BOOST_MUL(*f)(unsigned int, double, int), double theta)
+WEIGHTED_CFLOBDD_COMPLEX_FLOAT_BOOST_MUL ApplyGateFWithParam2(unsigned int n, unsigned int i, WEIGHTED_CFLOBDD_COMPLEX_FLOAT_BOOST_MUL(*f)(unsigned int, double, int), double theta)
 {
     WEIGHTED_CFLOBDD_COMPLEX_FLOAT_BOOST_MUL H = f(2, theta, 0);
     if (i == 0)
@@ -1064,7 +1065,7 @@ void WeightedBDDQuantumCircuit::ApplyIdentityGate(unsigned int index)
         std::cout << "Number of Qubits is unset" << std::endl;
         abort();   
     }
-    auto H = ApplyGateF(numQubits, index, WeightedMatrix1234ComplexFloatBoostMul::MkIdRelationInterleaved);
+    auto H = ApplyGateF2(numQubits, index, (WEIGHTED_CFLOBDD_COMPLEX_FLOAT_BOOST_MUL(*)(unsigned int, int))WeightedMatrix1234ComplexFloatBoostMul::MkIdRelationInterleaved);
     stateVector = WeightedMatrix1234ComplexFloatBoostMul::MatrixMultiplyV4(H, stateVector);
 }
 
@@ -1075,7 +1076,7 @@ void WeightedBDDQuantumCircuit::ApplyHadamardGate(unsigned int index)
         std::cout << "Number of Qubits is unset" << std::endl;
         abort();   
     }
-    auto H = ApplyGateF(numQubits, index, WeightedMatrix1234ComplexFloatBoostMul::MkWalshInterleaved);
+    auto H = ApplyGateF2(numQubits, index, (WEIGHTED_CFLOBDD_COMPLEX_FLOAT_BOOST_MUL(*)(unsigned int, int))WeightedMatrix1234ComplexFloatBoostMul::MkWalshInterleaved);
     // H.print(std::cout);
     stateVector = WeightedMatrix1234ComplexFloatBoostMul::MatrixMultiplyV4(H, stateVector);
     // stateVector.print(std::cout);
@@ -1091,7 +1092,7 @@ void WeightedBDDQuantumCircuit::ApplyNOTGate(unsigned int index)
         abort();   
     }
     // stateVector.print(std::cout);
-    auto X = ApplyGateF(numQubits, index, WeightedMatrix1234ComplexFloatBoostMul::MkNegationMatrixInterleaved);
+    auto X = ApplyGateF2(numQubits, index, (WEIGHTED_CFLOBDD_COMPLEX_FLOAT_BOOST_MUL(*)(unsigned int, int))WeightedMatrix1234ComplexFloatBoostMul::MkNegationMatrixInterleaved);
     stateVector = WeightedMatrix1234ComplexFloatBoostMul::MatrixMultiplyV4(X, stateVector);
     // stateVector.print(std::cout);
 }
@@ -1103,7 +1104,7 @@ void WeightedBDDQuantumCircuit::ApplyPauliYGate(unsigned int index)
         std::cout << "Number of Qubits is unset" << std::endl;
         abort();   
     }
-    auto Y = ApplyGateF(numQubits, index, WeightedMatrix1234ComplexFloatBoostMul::MkPauliYGate);
+    auto Y = ApplyGateF2(numQubits, index, (WEIGHTED_CFLOBDD_COMPLEX_FLOAT_BOOST_MUL(*)(unsigned int, int))WeightedMatrix1234ComplexFloatBoostMul::MkPauliYGate);
     stateVector = WeightedMatrix1234ComplexFloatBoostMul::MatrixMultiplyV4(Y, stateVector);
 }
 
@@ -1114,13 +1115,13 @@ void WeightedBDDQuantumCircuit::ApplyPauliZGate(unsigned int index)
         std::cout << "Number of Qubits is unset" << std::endl;
         abort();   
     }
-    auto Z = ApplyGateF(numQubits, index, WeightedMatrix1234ComplexFloatBoostMul::MkPauliZGate);
+    auto Z = ApplyGateF2(numQubits, index, (WEIGHTED_CFLOBDD_COMPLEX_FLOAT_BOOST_MUL(*)(unsigned int, int))WeightedMatrix1234ComplexFloatBoostMul::MkPauliZGate);
     stateVector = WeightedMatrix1234ComplexFloatBoostMul::MatrixMultiplyV4(Z, stateVector);
 }
 
 void WeightedBDDQuantumCircuit::ApplySGate(unsigned int index)
 {
-    auto S = ApplyGateF(numQubits, index, WeightedMatrix1234ComplexFloatBoostMul::MkSGate);
+    auto S = ApplyGateF2(numQubits, index, (WEIGHTED_CFLOBDD_COMPLEX_FLOAT_BOOST_MUL(*)(unsigned int, int))WeightedMatrix1234ComplexFloatBoostMul::MkSGate);
     stateVector = WeightedMatrix1234ComplexFloatBoostMul::MatrixMultiplyV4(S, stateVector);
 }
 
@@ -1256,7 +1257,7 @@ void WeightedBDDQuantumCircuit::ApplyPhaseShiftGate(unsigned int index, double t
         std::cout << "Number of Qubits is unset" << std::endl;
         abort();   
     }
-    auto S = ApplyGateFWithParam(numQubits, index, WeightedMatrix1234ComplexFloatBoostMul::MkPhaseShiftGate, theta);
+    auto S = ApplyGateFWithParam2(numQubits, index, (WEIGHTED_CFLOBDD_COMPLEX_FLOAT_BOOST_MUL(*)(unsigned int, double, int))WeightedMatrix1234ComplexFloatBoostMul::MkPhaseShiftGate, theta);
     stateVector = WeightedMatrix1234ComplexFloatBoostMul::MatrixMultiplyV4(S, stateVector); 
 }
 
@@ -1267,7 +1268,7 @@ void WeightedBDDQuantumCircuit::ApplyTGate(unsigned int index)
         std::cout << "Number of Qubits is unset" << std::endl;
         abort();   
     }
-    auto S = ApplyGateFWithParam(numQubits, index, WeightedMatrix1234ComplexFloatBoostMul::MkPhaseShiftGate, 0.25);
+    auto S = ApplyGateFWithParam2(numQubits, index, (WEIGHTED_CFLOBDD_COMPLEX_FLOAT_BOOST_MUL(*)(unsigned int, double, int))WeightedMatrix1234ComplexFloatBoostMul::MkPhaseShiftGate, 0.25);
     stateVector = WeightedMatrix1234ComplexFloatBoostMul::MatrixMultiplyV4(S, stateVector); 
 }
 
